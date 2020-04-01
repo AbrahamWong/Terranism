@@ -8,7 +8,6 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float moveSpeed;
     private float currentSpeed;
-    private bool isSideways, isForward, isBackward;
     private bool pickupObject = false;
     private Animator anim;
     private Rigidbody rb;
@@ -21,33 +20,68 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
+    //rb.AddRelativeForce (Vector3.forward * 10 - rigidbody.velocity);
     void Update()
     {
-        if (Input.GetButton("Horizontal"))
+        if ((Input.GetButton("Vertical") && Input.GetButton("Horizontal"))||
+            (Input.GetButton("Horizontal") && Input.GetButton("Vertical")))
         {
-            isSideways = true;
-            isForward = false;
-            isBackward = false;
-
-            anim.SetBool("isSideways", true);
-            currentSpeed = Input.GetAxis("Horizontal") * moveSpeed;
-            rb.AddForce(currentSpeed * transform.right, ForceMode.VelocityChange);
-        }
-        else if (Input.GetButton("Vertical"))
-        {
-            isSideways = false;
             currentSpeed = Input.GetAxis("Vertical") * moveSpeed;
             if (currentSpeed < 0)
             {
-                isForward = true; isBackward = false;
+                //s
                 anim.SetBool("isSideways", false);
+                anim.SetBool("isBackward", true);
+                anim.SetBool("isForward", false);
             }
             else if (currentSpeed > 0)
             {
-                isForward = false; isBackward = true;
+                //w
+                anim.SetBool("isSideways", false);
+                anim.SetBool("isBackward", false);
+                anim.SetBool("isForward", true);
+            }
+            if (Mathf.Abs(rb.velocity.x) < 2.8)
+                rb.AddForce(Input.GetAxis("Horizontal") * moveSpeed * transform.right, ForceMode.VelocityChange);
+            else if (Mathf.Abs(rb.velocity.x) > 2.8)
+                rb.velocity = new Vector3(2.8f * Input.GetAxis("Horizontal"), 0, rb.velocity.z);
+            if (Mathf.Abs(rb.velocity.z) < 2.8)
+                rb.AddForce(currentSpeed * transform.forward, ForceMode.VelocityChange);
+            else if (Mathf.Abs(rb.velocity.z) > 2.8)
+                rb.velocity = new Vector3(rb.velocity.x, 0, 2.8f*Input.GetAxis("Vertical"));
+        }
+        else if (Input.GetButton("Horizontal"))
+        {
+            anim.SetBool("isSideways", true);
+            currentSpeed = Input.GetAxis("Horizontal") * moveSpeed;
+            rb.velocity = new Vector3(rb.velocity.x, 0, 0);
+            if (Mathf.Abs(rb.velocity.x) < 4)
+                rb.AddForce(currentSpeed * transform.right, ForceMode.VelocityChange);
+            else if (Mathf.Abs(rb.velocity.x) > 4)
+                rb.velocity = new Vector3(4 * Input.GetAxis("Horizontal"), 0, rb.velocity.z);
+        }
+        else if (Input.GetButton("Vertical"))
+        {
+            currentSpeed = Input.GetAxis("Vertical") * moveSpeed;
+            if (currentSpeed < 0)
+            {
+                //s
+                anim.SetBool("isSideways", false);
+                anim.SetBool("isBackward", true);
+                anim.SetBool("isForward", false);
+            }
+            else if (currentSpeed > 0)
+            {
+                //w
+                anim.SetBool("isSideways", false);
+                anim.SetBool("isBackward", false);
+                anim.SetBool("isForward", true);
             }
 
-            rb.AddForce(currentSpeed * transform.forward, ForceMode.VelocityChange);
+            if (Mathf.Abs(rb.velocity.z) < 4)
+                rb.AddForce(currentSpeed * transform.forward, ForceMode.VelocityChange);
+            else if (Mathf.Abs(rb.velocity.z) > 4)
+                rb.velocity = new Vector3(rb.velocity.x, 0, 4 * Input.GetAxis("Vertical"));
         }
         else if (Input.GetKeyUp(KeyCode.E))
         {               // Item Pickup
@@ -75,12 +109,21 @@ public class Player : MonoBehaviour
             rb.velocity *= 0.8f;
         }
 
+        if (Input.GetButtonUp("Horizontal"))
+        {
+            rb.velocity = new Vector3(0.1f, 0, rb.velocity.z);
+        }
+
+        if (Input.GetButtonUp("Vertical"))
+        {
+            rb.velocity = new Vector3(rb.velocity.x, 0, 0.1f);
+        }
+
         // Walking and idle animation
         if (currentSpeed != 0)
         {
             anim.SetFloat("walkingSpeed", moveSpeed);
-
-            if (isSideways)
+            if (anim.GetBool("isSideways"))
             {
                 if (currentSpeed > 0)
                 {
