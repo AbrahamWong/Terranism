@@ -93,6 +93,7 @@ public class Player : MonoBehaviour
             // Animation
             if (pickupObject)
             {
+                //rb.transform.localPosition = new Vector3( rb.position.x + (float)0.5, rb.position.y, rb.position.z);
                 anim.SetBool("isPickup", true);
                 anim.SetBool("isHoldingItem", false);
             }
