@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
 {
     // To able to edit variable in Debug mode...
     [SerializeField]
-    private float moveSpeed;
+    private float moveSpeed = 0.7f;
     private float currentSpeed;
     private bool pickupObject = false;
     private Animator anim;
